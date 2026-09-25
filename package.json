@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Root workspace to launch ML service, backend, and frontend simultaneously",
   "scripts": {
-    "start": "concurrently -n \"ML,BACKEND,FRONTEND\" -c \"magenta,cyan,green\" \"uvicorn ml.api:app --host 127.0.0.1 --port 8000\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "dev": "concurrently -n \"ML,BACKEND,FRONTEND\" -c \"magenta,cyan,green\" \"uvicorn ml.api:app --host 127.0.0.1 --port 8000\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+    "start": "concurrently -n \"ML,BACKEND,FRONTEND\" -c \"magenta,cyan,green\" \"python -m uvicorn ml.api:app --host 127.0.0.1 --port 8000\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev": "concurrently -n \"ML,BACKEND,FRONTEND\" -c \"magenta,cyan,green\" \"python -m uvicorn ml.api:app --host 127.0.0.1 --port 8000\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
