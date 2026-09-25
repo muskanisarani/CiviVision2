@@ -114,15 +114,20 @@ def process_image_and_predict(image_bytes: bytes, threshold: float = DEFAULT_CON
     try:
         transform = get_transforms(is_training=False)
         tensor = transform(image).unsqueeze(0).to(state.device)
+        tensor_flipped = transform(image.transpose(Image.FLIP_LEFT_RIGHT)).unsqueeze(0).to(state.device)
 
         with torch.no_grad():
-            outputs = state.model(tensor)
-            probs = torch.softmax(outputs, dim=1).squeeze(0).cpu().numpy()
+            out1 = state.model(tensor)
+            out2 = state.model(tensor_flipped)
+            avg_outputs = (out1 + out2) / 2.0
+            probs = torch.softmax(avg_outputs, dim=1).squeeze(0).cpu().numpy()
 
         sorted_indices = probs.argsort()[::-1]
         top_class_idx = int(sorted_indices[0])
         top_class_raw = state.classes[top_class_idx]
         top_confidence = float(probs[top_class_idx])
+        second_confidence = float(probs[sorted_indices[1]]) if len(sorted_indices) > 1 else 0.0
+        margin = round(top_confidence - second_confidence, 4)
 
         top_predictions = []
         for idx in sorted_indices[:3]:
@@ -134,7 +139,8 @@ def process_image_and_predict(image_bytes: bytes, threshold: float = DEFAULT_CON
             })
 
         is_non_civic = top_class_raw == "Non_Civic"
-        needs_review = top_confidence < threshold or is_non_civic
+        is_ambiguous = (top_confidence < threshold) or (margin < 0.15)
+        needs_review = is_ambiguous or is_non_civic
 
         return {
             "success": True,
@@ -142,6 +148,9 @@ def process_image_and_predict(image_bytes: bytes, threshold: float = DEFAULT_CON
             "category": state.display_names.get(top_class_raw, top_class_raw.replace("_", " ")),
             "raw_category": top_class_raw,
             "confidence": round(top_confidence, 4),
+            "second_confidence": round(second_confidence, 4),
+            "margin": margin,
+            "is_ambiguous": bool(is_ambiguous),
             "severity": None,
             "top_predictions": top_predictions,
             "needs_review": bool(needs_review),

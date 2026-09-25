@@ -67,25 +67,30 @@ def predict_image(
         model.eval()
         metadata = {"model_version": "civivision-cv-v1 (unweighted-initial)"}
 
-    # Load and transform image
+    # Load and transform image (with Test-Time Augmentation)
     try:
         with Image.open(image_path) as img:
             rgb_image = img.convert("RGB")
         transform = get_transforms(is_training=False)
         tensor = transform(rgb_image).unsqueeze(0).to(device)
+        tensor_flipped = transform(rgb_image.transpose(Image.FLIP_LEFT_RIGHT)).unsqueeze(0).to(device)
     except Exception as e:
         return {"success": False, "error": f"Failed to load image: {str(e)}"}
 
-    # Inference
+    # Inference with TTA (average original and horizontal flip)
     with torch.no_grad():
-        outputs = model(tensor)
-        probs = torch.softmax(outputs, dim=1).squeeze(0).cpu().numpy()
+        out1 = model(tensor)
+        out2 = model(tensor_flipped)
+        avg_outputs = (out1 + out2) / 2.0
+        probs = torch.softmax(avg_outputs, dim=1).squeeze(0).cpu().numpy()
 
     # Top predictions
     sorted_indices = probs.argsort()[::-1]
     top_class_idx = int(sorted_indices[0])
     top_class_raw = classes[top_class_idx]
     top_confidence = float(probs[top_class_idx])
+    second_confidence = float(probs[sorted_indices[1]]) if len(sorted_indices) > 1 else 0.0
+    margin = round(top_confidence - second_confidence, 4)
 
     top_predictions = []
     for idx in sorted_indices[:3]:
@@ -99,7 +104,10 @@ def predict_image(
     is_non_civic = top_class_raw == "Non_Civic"
     is_civic_issue = not is_non_civic
     display_category = display_names.get(top_class_raw, top_class_raw.replace("_", " "))
-    needs_review = top_confidence < threshold
+    
+    # Dual-trigger uncertainty: low absolute confidence OR narrow margin between top-1 and top-2
+    is_ambiguous = (top_confidence < threshold) or (margin < 0.15)
+    needs_review = is_ambiguous or is_non_civic
 
     result = {
         "success": True,
@@ -107,7 +115,10 @@ def predict_image(
         "category": display_category,
         "raw_category": top_class_raw,
         "confidence": round(top_confidence, 4),
-        "severity": None,  # Severity is null until dedicated labeled dataset is trained
+        "second_confidence": round(second_confidence, 4),
+        "margin": margin,
+        "is_ambiguous": is_ambiguous,
+        "severity": None,
         "top_predictions": top_predictions,
         "needs_review": needs_review,
         "model_version": metadata.get("model_version", "civivision-cv-v1")

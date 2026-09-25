@@ -58,6 +58,25 @@ router.post('/verify', verifyAuth, async (req, res) => {
         model_name: 'MobileNetV3-Large'
       };
       engineSource = 'mobilenetv3-transfer-learning';
+
+      // 1.1 CASCADE ESCALATION: If local model is ambiguous (low confidence or narrow top1-top2 margin)
+      const isAmbiguous = mlResponse.is_ambiguous || (mlResponse.confidence < 0.70) || (mlResponse.margin !== undefined && mlResponse.margin < 0.15);
+      if (isAmbiguous) {
+        const { disambiguateCandidatesWithGemini } = require('../services/geminiService');
+        const disambiguated = await disambiguateCandidatesWithGemini(image, mlResponse.top_predictions);
+        if (disambiguated && disambiguated.primaryCategory) {
+          classificationResult.category = disambiguated.primaryCategory;
+          classificationResult.raw_category = disambiguated.primaryCategory.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+          classificationResult.secondary_category = disambiguated.secondaryCategory || null;
+          classificationResult.confidence = disambiguated.confidence || 90;
+          classificationResult.severity = disambiguated.severity || 'Medium';
+          classificationResult.description = disambiguated.rationale || `Disambiguated as ${disambiguated.primaryCategory}`;
+          classificationResult.is_civic_issue = disambiguated.isCivicIssue !== false;
+          classificationResult.needs_human_review = false;
+          classificationResult.model_name = 'MobileNetV3 + Gemini 1.5 Flash (Cascade Disambiguation)';
+          engineSource = 'cascade-ensemble';
+        }
+      }
     } else {
       // 2. FALLBACK: Google Gemini Multimodal Vision (if enabled)
       const enableFallback = process.env.ENABLE_GEMINI_FALLBACK !== 'false';

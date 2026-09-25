@@ -227,7 +227,60 @@ Return ONLY valid JSON matching this exact structure:
   };
 }
 
+/**
+ * Constrained Multimodal Disambiguation (Cascade Pattern)
+ * Given the local MobileNetV3 model's top-2/3 candidate classes,
+ * uses Gemini 1.5 Flash to inspect visual context and pick the definitive primary category.
+ */
+async function disambiguateCandidatesWithGemini(base64Image, candidateList = []) {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!GEMINI_API_KEY || candidateList.length === 0) return null;
+
+  try {
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const base64Data = base64Image.split(',')[1] || base64Image;
+    const mimeType = base64Image.split(';')[0].split(':')[1] || 'image/jpeg';
+    const candidateNames = candidateList.map(c => typeof c === 'string' ? c : c.category).filter(Boolean);
+
+    const prompt = `You are the CiviVision Municipal AI Inspector performing intelligent disambiguation.
+The local edge vision model detected multiple possible civic defect candidates in this photo:
+Candidate Categories: ${JSON.stringify(candidateNames)}
+
+Examine the photo carefully to resolve the ambiguity:
+1. Determine which candidate is the TRUE PRIMARY municipal defect.
+2. If there is a compound issue (e.g. water leaking on damaged road surface), identify the PRIMARY issue (e.g. Water Issue) and optional SECONDARY issue (e.g. Road Damage).
+3. If this photo shows NO municipal defect at all (e.g. personal photo, non-civic scene), set isCivicIssue: false and primaryCategory: "Non-Civic / Invalid".
+
+Return ONLY valid JSON:
+{
+  "isCivicIssue": true,
+  "primaryCategory": "<exact name from candidates or standard portal categories>",
+  "secondaryCategory": "<optional secondary category or null>",
+  "confidence": 92,
+  "severity": "Low" | "Medium" | "High" | "Critical",
+  "rationale": "1-2 concise sentences explaining the visual reason (e.g. Active pipeline leakage detected creating a surface puddle on the street)."
+}`;
+
+    const result = await model.generateContent([
+      prompt,
+      { inlineData: { data: base64Data, mimeType } }
+    ]);
+    const responseText = result.response.text();
+    const match = responseText.trim().match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[0]);
+    }
+  } catch (err) {
+    console.warn('Gemini Disambiguation Note:', err.message);
+  }
+  return null;
+}
+
 module.exports = {
   analyzeImageWithGemini,
+  disambiguateCandidatesWithGemini,
   SUPPORTED_CATEGORIES
 };
