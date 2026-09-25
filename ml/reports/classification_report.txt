@@ -4,20 +4,20 @@ CIVIVISION MODEL TEST EVALUATION REPORT (civivision-cv-v1)
 
                      precision    recall  f1-score   support
 
-  Drainage_Sewerage       0.78      0.70      0.74        10
-      Garbage_Waste       0.67      0.60      0.63        10
-          Non_Civic       0.83      0.91      0.87        11
-Public_Toilet_Issue       0.90      1.00      0.95         9
-        Road_Damage       0.75      0.82      0.78        11
-       Streetlights       0.86      0.60      0.71        10
-        Water_Issue       0.67      0.80      0.73        10
+  Drainage_Sewerage       1.00      0.70      0.82        10
+      Garbage_Waste       0.47      0.80      0.59        10
+          Non_Civic       0.62      0.91      0.74        11
+Public_Toilet_Issue       1.00      0.56      0.71         9
+        Road_Damage       0.90      0.82      0.86        11
+       Streetlights       0.88      0.70      0.78        10
+        Water_Issue       0.88      0.70      0.78        10
 
-           accuracy                           0.77        71
-          macro avg       0.78      0.78      0.77        71
-       weighted avg       0.78      0.77      0.77        71
+           accuracy                           0.75        71
+          macro avg       0.82      0.74      0.75        71
+       weighted avg       0.82      0.75      0.76        71
 
 =================================================================
-Overall Accuracy : 77.46%
-Macro F1-Score   : 0.7716
-Weighted F1-Score: 0.7706
+Overall Accuracy : 74.65%
+Macro F1-Score   : 0.7548
+Weighted F1-Score: 0.7566
 =================================================================

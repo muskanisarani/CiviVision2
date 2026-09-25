@@ -1,7 +1,7 @@
 {
   "model_version": "civivision-cv-v1",
-  "best_epoch": 14,
-  "best_validation_macro_f1": 0.846221822062158,
+  "best_epoch": 8,
+  "best_validation_macro_f1": 0.8495395127748069,
   "training_samples": 290,
   "validation_samples": 60,
   "device": "cpu",

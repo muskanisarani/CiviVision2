@@ -1,52 +1,52 @@
 {
   "model_version": "civivision-cv-v1",
   "total_test_samples": 71,
-  "overall_accuracy": 0.7746478873239436,
-  "macro_precision": 0.7787981859410431,
-  "macro_recall": 0.7753246753246753,
-  "macro_f1": 0.7715883524202275,
-  "weighted_f1": 0.7706477487522082,
+  "overall_accuracy": 0.7464788732394366,
+  "macro_precision": 0.8207983193277312,
+  "macro_recall": 0.7404040404040405,
+  "macro_f1": 0.7548352674403095,
+  "weighted_f1": 0.7566488254143598,
   "per_class_metrics": {
     "Drainage_Sewerage": {
-      "precision": 0.7777777777777778,
+      "precision": 1.0,
       "recall": 0.7,
-      "f1_score": 0.7368421052631579,
+      "f1_score": 0.8235294117647058,
       "support": 10
     },
     "Garbage_Waste": {
-      "precision": 0.6666666666666666,
-      "recall": 0.6,
-      "f1_score": 0.631578947368421,
+      "precision": 0.47058823529411764,
+      "recall": 0.8,
+      "f1_score": 0.5925925925925926,
       "support": 10
     },
     "Non_Civic": {
-      "precision": 0.8333333333333334,
+      "precision": 0.625,
       "recall": 0.9090909090909091,
-      "f1_score": 0.8695652173913043,
+      "f1_score": 0.7407407407407407,
       "support": 11
     },
     "Public_Toilet_Issue": {
-      "precision": 0.9,
-      "recall": 1.0,
-      "f1_score": 0.9473684210526315,
+      "precision": 1.0,
+      "recall": 0.5555555555555556,
+      "f1_score": 0.7142857142857143,
       "support": 9
     },
     "Road_Damage": {
-      "precision": 0.75,
+      "precision": 0.9,
       "recall": 0.8181818181818182,
-      "f1_score": 0.782608695652174,
+      "f1_score": 0.8571428571428571,
       "support": 11
     },
     "Streetlights": {
-      "precision": 0.8571428571428571,
-      "recall": 0.6,
-      "f1_score": 0.7058823529411765,
+      "precision": 0.875,
+      "recall": 0.7,
+      "f1_score": 0.7777777777777778,
       "support": 10
     },
     "Water_Issue": {
-      "precision": 0.6666666666666666,
-      "recall": 0.8,
-      "f1_score": 0.7272727272727273,
+      "precision": 0.875,
+      "recall": 0.7,
+      "f1_score": 0.7777777777777778,
       "support": 10
     }
   }
