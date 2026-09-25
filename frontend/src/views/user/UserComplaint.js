@@ -139,19 +139,19 @@ const UserComplaint = () => {
     setIsLocating(true);
     setRejectionError(null);
     const pWard = currentUser?.ward || 'Sector 5';
-    const pCity = currentUser?.city || 'Deesa';
+    const pCity = currentUser?.city || 'Gandhinagar';
     const formattedLocation = `${pWard}, ${pCity.charAt(0).toUpperCase() + pCity.slice(1)}`;
     
-    let lat = 24.2575;
-    let lng = 72.1819;
-    if (pCity.toLowerCase() === 'gandhinagar') {
-      lat = 23.2156;
-      lng = 72.6369;
+    let lat = 23.2156;
+    let lng = 72.6369;
+    if (pCity.toLowerCase() === 'deesa') {
+      lat = 24.2575;
+      lng = 72.1819;
     }
     
     setTimeout(() => {
       updateCoords(lat, lng, formattedLocation);
-    }, 450);
+    }, 200);
   };
 
   const handleDetectLiveLocation = () => {
@@ -163,19 +163,23 @@ const UserComplaint = () => {
         async (pos) => {
           const { latitude: lat, longitude: lng } = pos.coords;
           try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+              headers: { 'Accept': 'application/json' }
+            });
             const data = await res.json();
-            const addr = data.display_name?.split(',').slice(0, 3).join(',') || `Sector (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)`;
+            const addr = data.display_name?.split(',').slice(0, 3).join(',') || `Mota Chiloda, Gandhinagar Taluka, Gandhinagar`;
             updateCoords(lat, lng, addr);
           } catch {
-            updateCoords(lat, lng);
+            updateCoords(lat, lng, 'Mota Chiloda, Gandhinagar Taluka, Gandhinagar');
           }
         },
-        () => updateCoords(23.2156 + (Math.random() - 0.5) * 0.02, 72.6369 + (Math.random() - 0.5) * 0.02, 'Gandhinagar Ward Sector 5'),
-        { enableHighAccuracy: true, timeout: 10000 }
+        () => {
+          updateCoords(23.2156 + (Math.random() - 0.5) * 0.01, 72.6369 + (Math.random() - 0.5) * 0.01, 'Mota Chiloda, Gandhinagar Taluka, Gandhinagar');
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
       );
     } else {
-      updateCoords(23.2156, 72.6369, 'Gandhinagar Sector 5');
+      updateCoords(23.2156, 72.6369, 'Mota Chiloda, Gandhinagar Taluka, Gandhinagar');
     }
   };
 

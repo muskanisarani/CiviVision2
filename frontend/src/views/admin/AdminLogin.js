@@ -4,39 +4,25 @@ import { AuthContext } from '../../context/AuthContext';
 import '../../styles/user.css';
 
 const AdminLogin = () => {
-  const { loginAdmin, registerAdmin } = useContext(AuthContext);
+  const { loginAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [isRegister, setIsRegister] = useState(false);
-  const [loginType, setLoginType] = useState('email');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Login Fields
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginMobile, setLoginMobile] = useState('');
+  const [loginEmail, setLoginEmail] = useState('civivision@gmail.com');
   const [loginPassword, setLoginPassword] = useState('');
-
-  // Register Fields
-  const [regName, setRegName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regMobile, setRegMobile] = useState('');
-  const [regPassword, setRegPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    const loginValue = loginType === 'email' ? loginEmail : loginMobile;
-    const success = await loginAdmin(loginType, loginValue, loginPassword);
-    setIsSubmitting(false);
-    if (success) {
-      navigate('/admin/dashboard');
-    }
-  };
+    setErrorMessage('');
 
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
+    if (loginEmail.toLowerCase().trim() !== 'civivision@gmail.com') {
+      setErrorMessage('Access Denied: Only official admin email civivision@gmail.com is authorized.');
+      return;
+    }
+
     setIsSubmitting(true);
-    const success = await registerAdmin(regName, regEmail, regMobile, regPassword);
+    const success = await loginAdmin(loginEmail, loginPassword);
     setIsSubmitting(false);
     if (success) {
       navigate('/admin/dashboard');
@@ -94,15 +80,15 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          {/* Right Side: Admin Form Card */}
+          {/* Right Side: Admin Login Card */}
           <div className="glass-card-detailed" style={{ padding: '36px 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
                 <h2 style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
-                  {isRegister ? 'Register Officer' : 'Officer Login'}
+                  Officer Login
                 </h2>
                 <p style={{ fontSize: '12.5px', color: 'var(--text-muted, #64748b)', margin: 0 }}>
-                  {isRegister ? 'Create authorized municipal officer credentials' : 'Sign in to access GMC control room'}
+                  Sign in to access GMC administrative control room
                 </p>
               </div>
               <span className="badge-pill-detailed badge-pill-indigo" style={{ fontSize: '11px' }}>
@@ -110,164 +96,53 @@ const AdminLogin = () => {
               </span>
             </div>
 
-            {!isRegister ? (
-              // LOGIN FORM
-              <form onSubmit={handleLoginSubmit}>
-                {/* Login Type Tabs */}
-                <div style={{ display: 'flex', background: 'rgba(99, 102, 241, 0.08)', borderRadius: '12px', padding: '4px', marginBottom: '18px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setLoginType('email')}
-                    style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '8px', background: loginType === 'email' ? '#6366f1' : 'transparent', color: loginType === 'email' ? '#fff' : 'var(--text-primary, #0f172a)', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', transition: 'all 0.2s' }}
-                  >
-                    ✉️ Email
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLoginType('mobile')}
-                    style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '8px', background: loginType === 'mobile' ? '#6366f1' : 'transparent', color: loginType === 'mobile' ? '#fff' : 'var(--text-primary, #0f172a)', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', transition: 'all 0.2s' }}
-                  >
-                    📱 Mobile
-                  </button>
-                </div>
-
-                {loginType === 'email' ? (
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                      Officer Official Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      placeholder="e.g. officer@gmc.gov.in"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                ) : (
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                      Registered Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      className="form-control"
-                      maxLength="10"
-                      placeholder="10-digit mobile number"
-                      value={loginMobile}
-                      onChange={(e) => setLoginMobile(e.target.value.replace(/[^0-9]/g, ''))}
-                      required
-                    />
-                  </div>
-                )}
-
-                <div style={{ marginBottom: '22px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                    Officer Security Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Enter security password"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  style={{ width: '100%', padding: '12px', background: '#0f172a', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 15px rgba(15, 23, 42, 0.3)' }}
-                >
-                  {isSubmitting ? 'Authenticating...' : 'Sign In as Municipal Admin'}
-                </button>
-
-                <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px' }}>
-                  <span style={{ color: 'var(--text-muted, #64748b)' }}>New GMC Officer? </span>
-                  <span onClick={() => setIsRegister(true)} style={{ color: '#6366f1', fontWeight: '700', cursor: 'pointer' }}>
-                    Register Profile
-                  </span>
-                </div>
-              </form>
-            ) : (
-              // REGISTER FORM
-              <form onSubmit={handleRegisterSubmit}>
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                    Officer Full Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Inspector R. Sharma"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                    Officer Email (Gmail / Govt)
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="e.g. officer@gmc.gov.in"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                    Mobile Number
-                  </label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    maxLength="10"
-                    placeholder="10-digit mobile number"
-                    value={regMobile}
-                    onChange={(e) => setRegMobile(e.target.value.replace(/[^0-9]/g, ''))}
-                    required
-                  />
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
-                    Create Security Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    placeholder="Minimum 6 characters"
-                    value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  style={{ width: '100%', padding: '12px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)' }}
-                >
-                  {isSubmitting ? 'Registering...' : 'Complete Admin Registration'}
-                </button>
-
-                <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px' }}>
-                  <span style={{ color: 'var(--text-muted, #64748b)' }}>Already registered? </span>
-                  <span onClick={() => setIsRegister(false)} style={{ color: '#6366f1', fontWeight: '700', cursor: 'pointer' }}>
-                    Back to Officer Login
-                  </span>
-                </div>
-              </form>
+            {errorMessage && (
+              <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#b91c1c', fontSize: '13px', marginBottom: '16px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                ⚠️ {errorMessage}
+              </div>
             )}
 
+            <form onSubmit={handleLoginSubmit}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
+                  Official Administrator Email
+                </label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="e.g. civivision@gmail.com"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-primary, #0f172a)', display: 'block', marginBottom: '6px' }}>
+                  Officer Security Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Enter administrator password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                style={{ width: '100%', padding: '12px', background: '#0f172a', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: isSubmitting ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(15, 23, 42, 0.3)' }}
+              >
+                {isSubmitting ? 'Authenticating...' : 'Sign In as Municipal Admin'}
+              </button>
+
+              <div style={{ textAlign: 'center', marginTop: '20px', padding: '12px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.03)', border: '1px solid rgba(15, 23, 42, 0.06)', fontSize: '12px', color: 'var(--text-muted, #64748b)' }}>
+                ℹ️ Administrative registration is strictly restricted. For new officer provisioning, contact the GMC IT Directorate.
+              </div>
+            </form>
           </div>
 
         </div>

@@ -156,9 +156,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginAdmin = async (type, value, password) => {
-    if (type === 'email' && !value.endsWith('@gmail.com')) {
-      alert('Please use a valid Gmail address.');
+  const loginAdmin = async (value, password) => {
+    const trimmed = (value || '').toLowerCase().trim();
+    if (trimmed !== 'civivision@gmail.com') {
+      alert('Access Denied: Only official admin email civivision@gmail.com is permitted.');
       return false;
     }
 
@@ -166,7 +167,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value, password, isAdminLogin: true }),
+        body: JSON.stringify({ value: trimmed, password, isAdminLogin: true }),
         credentials: 'include'
       });
 
@@ -185,48 +186,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Admin login error:', error);
       alert('Network error during admin login.');
-      return false;
-    }
-  };
-
-  const registerAdmin = async (name, email, mobile, password) => {
-    if (!email.endsWith('@gmail.com')) {
-      alert('Please use a valid Gmail address.');
-      return false;
-    }
-
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          mobile,
-          password,
-          city: 'Gandhinagar',
-          state: 'Gujarat',
-          role: 'admin'
-        }),
-        credentials: 'include'
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.error || 'Admin registration failed');
-        return false;
-      }
-
-      setCurrentUser(data.user);
-      localStorage.setItem('userRole', data.user.role);
-      localStorage.setItem('userEmail', data.user.email);
-      localStorage.setItem('userName', data.user.name);
-      alert('Registration successful!');
-      return true;
-
-    } catch (error) {
-      console.error('Admin registration error:', error);
-      alert('Network error during admin registration.');
       return false;
     }
   };
@@ -293,7 +252,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading, loginUser, registerUser, loginAdmin, registerAdmin, logout, updateUser, sendOTP }}>
+    <AuthContext.Provider value={{ currentUser, loading, loginUser, registerUser, loginAdmin, logout, updateUser, sendOTP }}>
       {children}
     </AuthContext.Provider>
   );

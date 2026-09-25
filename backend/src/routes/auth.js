@@ -28,11 +28,16 @@ router.post('/login', async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ error: 'User credentials not found. Please register first.' });
+      return res.status(404).json({ error: 'User credentials not found. Please check your credentials.' });
     }
 
-    if (isAdminLogin && user.role !== 'admin') {
-      return res.status(403).json({ error: 'Unauthorized. Not an administrator account.' });
+    if (isAdminLogin) {
+      if (value.toLowerCase().trim() !== 'civivision@gmail.com') {
+        return res.status(403).json({ error: 'Unauthorized: Only official admin email civivision@gmail.com is permitted for admin access.' });
+      }
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Unauthorized. Not an administrator account.' });
+      }
     }
 
     const passwordValid = await bcrypt.compare(password, user.passwordHash);
@@ -124,6 +129,9 @@ router.post('/register', async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    if (normalizedEmail === 'civivision@gmail.com' || role === 'admin') {
+      return res.status(403).json({ error: 'Administrative accounts cannot be registered publicly.' });
+    }
 
     if (mobile.length !== 10 || !/^\d+$/.test(mobile)) {
       return res.status(400).json({ error: 'Mobile number must be exactly 10 digits' });
